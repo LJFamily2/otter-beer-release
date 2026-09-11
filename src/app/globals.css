@@ -1,0 +1,305 @@
+@import "tailwindcss";
+
+/* Design tokens: "Coastal Premium" system — see docs/DESIGN.md.
+   Registering these under @theme makes them real Tailwind utilities
+   (bg-primary, text-on-surface-variant, font-display, rounded-lg, ...)
+   instead of ad-hoc CSS custom properties. */
+@theme {
+  /* Color: surfaces */
+  --color-surface: #f4fafd;
+  --color-surface-dim: #d4dbdd;
+  --color-surface-bright: #f4fafd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eef5f7;
+  --color-surface-container: #e8eff1;
+  --color-surface-container-high: #e2e9ec;
+  --color-surface-container-highest: #dde4e6;
+  --color-on-surface: #161d1f;
+  --color-on-surface-variant: #444650;
+  --color-inverse-surface: #2b3234;
+  --color-inverse-on-surface: #ebf2f4;
+  --color-outline: #747782;
+  --color-outline-variant: #c4c6d2;
+
+  /* Color: brand */
+  --color-primary: #002867;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1d3f82;
+  --color-on-primary-container: #90adf7;
+  --color-inverse-primary: #b0c6ff;
+  --color-secondary: #735c00;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fed65b;
+  --color-on-secondary-container: #745c00;
+  --color-tertiary: #2d2c29;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #43423f;
+  --color-on-tertiary-container: #b1aeaa;
+
+  /* Color: semantic */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  /* Color: fixed accents */
+  --color-primary-fixed: #d9e2ff;
+  --color-primary-fixed-dim: #b0c6ff;
+  --color-on-primary-fixed: #001946;
+  --color-on-primary-fixed-variant: #234487;
+  --color-secondary-fixed: #ffe088;
+  --color-secondary-fixed-dim: #e9c349;
+  --color-on-secondary-fixed: #241a00;
+  --color-on-secondary-fixed-variant: #574500;
+  --color-tertiary-fixed: #e6e2dd;
+  --color-tertiary-fixed-dim: #c9c6c1;
+  --color-on-tertiary-fixed: #1c1c19;
+  --color-on-tertiary-fixed-variant: #484743;
+  --color-mahogany: #341012;
+
+  --color-background: #f4fafd;
+  --color-on-background: #161d1f;
+  --color-surface-variant: #dde4e6;
+
+  /* Typography */
+  --font-display: var(--font-anton), "Anton", sans-serif;
+  --font-body: var(--font-hanken-grotesk), "Hanken Grotesk", sans-serif;
+  --font-sans: var(--font-hanken-grotesk), "Hanken Grotesk", sans-serif;
+
+  /* Shape — Coastal Premium is deliberately soft, not fully rounded */
+  --radius: 0.25rem;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  /* Elevation — diffused, blue-tinted ambient shadows only (see DESIGN.md) */
+  --shadow-sm: 0px 4px 10px rgba(29, 63, 130, 0.06);
+  --shadow-md: 0px 24px 64px -12px rgba(29, 63, 130, 0.08);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-on-surface);
+  background: var(--color-background);
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--color-primary);
+}
+
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+input[type="button"]:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled {
+  cursor: not-allowed;
+}
+
+/* Brand Story page turn — see src/components/sections/BrandStorySection.tsx.
+   A single half-width leaf hinged at the gutter swings a full 180°, carrying
+   the outgoing page on its front face and the incoming one (pre-rotated) on
+   its back. Each nav re-mounts the leaf via a React `key` change, which
+   restarts these keyframes; the component clears the leaf on a timer, so
+   nothing here needs an animationend listener. Keep the 780ms in sync with
+   FLIP_MS in that file. */
+@keyframes brand-leaf-next {
+  0% {
+    transform: rotateY(0deg) skewY(0deg);
+  }
+  50% {
+    transform: rotateY(-90deg) skewY(-2deg);
+  }
+  100% {
+    transform: rotateY(-180deg) skewY(0deg);
+  }
+}
+@keyframes brand-leaf-prev {
+  0% {
+    transform: rotateY(0deg) skewY(0deg);
+  }
+  50% {
+    transform: rotateY(90deg) skewY(2deg);
+  }
+  100% {
+    transform: rotateY(180deg) skewY(0deg);
+  }
+}
+/* Paper darkens as it lifts through the vertical, with subtle specular shine. */
+@keyframes brand-leaf-shade {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.38;
+  }
+  50% {
+    opacity: 0.48;
+  }
+  60% {
+    opacity: 0.38;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Cast shadow sweeping across the resting page as the leaf turns overhead */
+@keyframes brand-cast-shadow-next {
+  0% {
+    opacity: 0;
+    background: linear-gradient(to left, rgba(42, 11, 18, 0.45), transparent 80%);
+  }
+  50% {
+    opacity: 0.55;
+    background: linear-gradient(to left, rgba(42, 11, 18, 0.5), rgba(42, 11, 18, 0.15));
+  }
+  100% {
+    opacity: 0;
+    background: linear-gradient(to right, rgba(42, 11, 18, 0.35), transparent 80%);
+  }
+}
+@keyframes brand-cast-shadow-prev {
+  0% {
+    opacity: 0;
+    background: linear-gradient(to right, rgba(42, 11, 18, 0.45), transparent 80%);
+  }
+  50% {
+    opacity: 0.55;
+    background: linear-gradient(to right, rgba(42, 11, 18, 0.5), rgba(42, 11, 18, 0.15));
+  }
+  100% {
+    opacity: 0;
+    background: linear-gradient(to left, rgba(42, 11, 18, 0.35), transparent 80%);
+  }
+}
+
+.brand-leaf-next {
+  animation: brand-leaf-next 780ms cubic-bezier(0.42, 0, 0.28, 1) forwards;
+}
+.brand-leaf-prev {
+  animation: brand-leaf-prev 780ms cubic-bezier(0.42, 0, 0.28, 1) forwards;
+}
+.brand-leaf-shade {
+  opacity: 0;
+  animation: brand-leaf-shade 780ms ease-in-out forwards;
+}
+.brand-cast-shadow-next {
+  animation: brand-cast-shadow-next 780ms cubic-bezier(0.42, 0, 0.28, 1) forwards;
+}
+.brand-cast-shadow-prev {
+  animation: brand-cast-shadow-prev 780ms cubic-bezier(0.42, 0, 0.28, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-leaf-next,
+  .brand-leaf-prev,
+  .brand-leaf-shade,
+  .brand-cast-shadow-next,
+  .brand-cast-shadow-prev {
+    animation-duration: 1ms;
+  }
+}
+
+.heritage-pattern {
+  background-image: radial-gradient(var(--color-primary-container) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.03;
+}
+
+.gold-border-top {
+  border-top: 2px solid var(--color-secondary-fixed-dim);
+}
+
+
+/* Brand marquee — see src/components/sections/MarqueeSection.tsx.
+   Two rows, each rendering its item list twice back-to-back and animating
+   exactly one half-width of translateX, so the loop is seamless regardless
+   of viewport width. `data-direction="right"` reverses which half a row
+   starts from, so the two rows visibly scroll toward each other. Frozen
+   under reduced motion, matching the hero indicator / brand-leaf convention
+   below. */
+@keyframes marquee-scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes marquee-scroll-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.marquee-track {
+  animation: marquee-scroll-left var(--marquee-duration, 30s) linear infinite;
+  will-change: transform;
+}
+.marquee-track[data-direction="right"] {
+  animation-name: marquee-scroll-right;
+}
+.marquee-fade-mask {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+/* Hero carousel indicator fill — see src/components/sections/HeroSection.tsx.
+   The active segment fills left-to-right across one autoplay dwell. The
+   component re-mounts the fill via a React `key` change on every slide change
+   and on every autoplay resume, which restarts these keyframes in step with
+   the restarted timer, and flips `data-paused` while autoplay is suspended
+   (drag in progress, tab backgrounded, focus inside the indicator group).
+   The duration is fed in as --hero-dwell from AUTO_PLAY_INTERVAL in that file,
+   so the two never drift apart. */
+@keyframes hero-indicator-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.hero-indicator-fill {
+  transform-origin: left center;
+  animation: hero-indicator-fill var(--hero-dwell, 6000ms) linear forwards;
+}
+.hero-indicator-fill[data-paused="true"] {
+  animation-play-state: paused;
+}
+/* Autoplay is switched off entirely under reduced motion, so the active
+   segment simply reads as filled with no sweep. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-indicator-fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+}

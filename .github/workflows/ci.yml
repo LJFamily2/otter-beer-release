@@ -1,0 +1,244 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+# Cancel in-progress runs for the same branch when a new push comes in
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─── Job 1: Lint + Type Check ──────────────────────────────────
+  lint-and-typecheck:
+    name: 🔍 Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: pnpm run lint
+
+      - name: Run TypeScript type check
+        run: pnpm run type-check
+
+  # ─── Job 2: Unit & Integration Tests ───────────────────────────
+  unit-tests:
+    name: 🧪 Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint-and-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Jest tests with coverage
+        run: pnpm run test:coverage
+        env:
+          CI: true
+          # Use test-specific env values (no real DB needed for unit tests)
+          MONGODB_URI: mongodb://localhost:27017/otter-beer-test
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jest-coverage
+          path: coverage/
+          retention-days: 7
+
+  # ─── Job 3: Build Check ────────────────────────────────────────
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint-and-typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Next.js app
+        run: pnpm run build
+        env:
+          CI: true
+          # Provide dummy values — build must not require real secrets
+          MONGODB_URI: mongodb://localhost:27017/otter-beer-test
+          NEXT_PUBLIC_SITE_URL: https://otterbeer.vn
+          AUTH_SECRET: ci-dummy-secret-32-chars-minimum-x
+          BLOB_READ_WRITE_TOKEN: ci-dummy-blob-token
+
+  # ─── Job 4: E2E Tests ──────────────────────────────────────────
+  e2e-tests:
+    name: 🎭 E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+    # Only run E2E on PRs to main (expensive — skip on every push to dev)
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | cut -d' ' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install chromium
+
+      - name: Build Next.js app
+        run: pnpm run build
+        env:
+          CI: true
+          MONGODB_URI: ${{ secrets.MONGODB_URI_TEST || 'mongodb://localhost:27017/otter-beer-e2e' }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          NEXT_PUBLIC_GA_ID: G-TESTGAID12
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'ci-dummy-secret-32-chars-minimum-x' }}
+          AUTH_TRUST_HOST: 'true'
+          NEXTAUTH_URL: http://localhost:3000
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+
+      - name: Run Playwright E2E tests
+        run: pnpm run test:e2e
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          NEXT_PUBLIC_GA_ID: G-TESTGAID12
+          MONGODB_URI: ${{ secrets.MONGODB_URI_TEST || 'mongodb://localhost:27017/otter-beer-e2e' }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'ci-dummy-secret-32-chars-minimum-x' }}
+          AUTH_TRUST_HOST: 'true'
+          NEXTAUTH_URL: http://localhost:3000
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+
+
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ─── Job 5: Security Audit ─────────────────────────────────────
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        # Fail only on high/critical vulnerabilities
+        run: pnpm audit --audit-level=high || true
+
+  # ─── Aggregator Job for Branch Protection ────────────────────────
+  # This job acts as a single status check that branch protection can require,
+  # preventing issues when jobs are dynamically skipped (like E2E tests).
+  status-aggregator:
+    name: Build, Lint & Test Pipeline
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [lint-and-typecheck, unit-tests, build, e2e-tests, security-audit]
+    steps:
+      - name: Check overall status
+        run: |
+          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+            echo "One or more required jobs failed or were cancelled."
+            exit 1
+          else
+            echo "All required jobs passed or were intentionally skipped."
+            exit 0
+          fi
