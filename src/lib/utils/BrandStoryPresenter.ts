@@ -46,19 +46,3 @@ export function toBookChapters(
   return chapters;
 }
 
-export const DEFAULT_BRAND_STORY_CHAPTERS: Record<string, BrandStoryChapter[]> = {
-  vi: [
-    { title: "Câu Chuyện", images: ["/images/contact-hero.jpg", "/images/age-verification-bg.jpg", "/images/new-bg.png"] },
-    { title: "Nguyên Liệu", images: ["/images/otter-beer-logo-yellow-bg.png", "/images/contact-hero.jpg"] },
-    { title: "Nấu Bia", images: ["/images/new-bg.png", "/images/age-verification-bg.jpg", "/images/otter-beer-logo-yellow-bg.png", "/images/contact-hero.jpg"] },
-    { title: "Cộng Đồng", images: ["/images/age-verification-bg.jpg", "/images/new-bg.png", "/images/contact-hero.jpg"] },
-    { title: "Nhật Ký", images: ["/images/otter-beer-og.png", "/images/new-bg.png"] },
-  ],
-  en: [
-    { title: "Our Story", images: ["/images/contact-hero.jpg", "/images/age-verification-bg.jpg", "/images/new-bg.png"] },
-    { title: "Ingredients", images: ["/images/otter-beer-logo-yellow-bg.png", "/images/contact-hero.jpg"] },
-    { title: "Brewing", images: ["/images/new-bg.png", "/images/age-verification-bg.jpg", "/images/otter-beer-logo-yellow-bg.png", "/images/contact-hero.jpg"] },
-    { title: "Community", images: ["/images/age-verification-bg.jpg", "/images/new-bg.png", "/images/contact-hero.jpg"] },
-    { title: "Journal", images: ["/images/otter-beer-og.png", "/images/new-bg.png"] },
-  ],
-};

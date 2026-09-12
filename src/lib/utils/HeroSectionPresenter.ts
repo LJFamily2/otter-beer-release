@@ -45,51 +45,5 @@ export function toSlideItem(slide: IHeroSlide, locale: string): HeroSlideItem | 
   };
 }
 
-export const DEFAULT_HERO_SLIDES: Record<string, HeroSlideItem[]> = {
-  vi: [
-    {
-      src: "/images/otter-beer-logo-yellow-bg.png",
-      alt: "Lon bia thủ công Otter Beer trên nền tối — dòng bia chủ lực nấu tại Tây Ninh",
-      mediaType: "image",
-    },
-    {
-      src: "/images/new-bg.png",
-      alt: "Bia Otter Beer Premium Lager rót ra ly, bọt mịn, màu vàng hổ phách",
-      mediaType: "image",
-    },
-    {
-      src: "/images/contact-hero.jpg",
-      alt: "Không gian taproom của nhà máy bia Otter Beer tại Tây Ninh",
-      mediaType: "image",
-    },
-    {
-      src: "/images/age-verification-bg.jpg",
-      alt: "Mạch nha vàng và hoa bia Saaz — nguyên liệu nấu bia thủ công Otter Beer",
-      mediaType: "image",
-    },
-  ],
-  en: [
-    {
-      src: "/images/otter-beer-logo-yellow-bg.png",
-      alt: "Otter Beer craft beer can on dark background — flagship brew from Tay Ninh",
-      mediaType: "image",
-    },
-    {
-      src: "/images/new-bg.png",
-      alt: "Poured glass of Otter Beer Premium Lager with fine foam and amber color",
-      mediaType: "image",
-    },
-    {
-      src: "/images/contact-hero.jpg",
-      alt: "Otter Beer taproom and brewery space in Tay Ninh",
-      mediaType: "image",
-    },
-    {
-      src: "/images/age-verification-bg.jpg",
-      alt: "Golden malt and Saaz hops — Otter Beer craft brewing ingredients",
-      mediaType: "image",
-    },
-  ],
-};
 
 

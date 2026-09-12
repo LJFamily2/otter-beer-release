@@ -11,10 +11,10 @@ import { heroSectionService } from "@/services/HeroSectionService";
 import { blogPostService } from "@/services/BlogPostService";
 import { beerService } from "@/services/BeerService";
 import { brandStoryService } from "@/services/BrandStoryService";
-import { toSlideItem, DEFAULT_HERO_SLIDES } from "@/lib/utils/HeroSectionPresenter";
+import { toSlideItem } from "@/lib/utils/HeroSectionPresenter";
 import { toNewsCardItem } from "@/lib/utils/BlogPostPresenter";
 import { toShowcaseItem } from "@/lib/utils/BeerPresenter";
-import { toBookChapters, DEFAULT_BRAND_STORY_CHAPTERS } from "@/lib/utils/BrandStoryPresenter";
+import { toBookChapters } from "@/lib/utils/BrandStoryPresenter";
 import { buildHomeJsonLd, buildHomeMetadata } from "@/lib/seo";
 import { faqFor } from "@/config/faq";
 
@@ -57,15 +57,6 @@ export default async function HomePage({ params }: HomePageProps) {
       .catch(() => []),
   ]);
 
-  const activeHeroSlides =
-    heroSlides.length > 0
-      ? heroSlides
-      : (DEFAULT_HERO_SLIDES[locale] ?? DEFAULT_HERO_SLIDES.vi);
-
-  const activeBrandStoryChapters =
-    brandStoryChapters.length > 0
-      ? brandStoryChapters
-      : (DEFAULT_BRAND_STORY_CHAPTERS[locale] ?? DEFAULT_BRAND_STORY_CHAPTERS.vi);
 
   const faq = faqFor(locale);
 
@@ -88,8 +79,8 @@ export default async function HomePage({ params }: HomePageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <HeroSection locale={locale} slides={activeHeroSlides} />
-      <BrandStorySection locale={locale} chapters={activeBrandStoryChapters} />
+      <HeroSection locale={locale} slides={heroSlides} />
+      <BrandStorySection locale={locale} chapters={brandStoryChapters} />
       <MarqueeSection locale={locale} />
       <TaglineSection locale={locale} />
       {beers.length > 0 ? <ProductShowcase locale={locale} beers={beers} /> : null}
