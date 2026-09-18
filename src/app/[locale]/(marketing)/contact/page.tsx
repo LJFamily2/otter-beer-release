@@ -6,10 +6,8 @@ import {
   buildOrganizationJsonLd,
   buildStaticPageMetadata,
   jsonLdGraph,
-  toBreadcrumbItems,
   type BreadcrumbEntry,
 } from "@/lib/seo";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ADDRESS, CONTACT } from "@/config/brand";
 
 interface ContactPageProps {
@@ -62,12 +60,6 @@ export default async function ContactPage({ params }: ContactPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="bg-[#0d0f10] pt-24 sm:pt-32 lg:pt-36">
-        <Breadcrumbs
-          items={toBreadcrumbItems(locale, trail)}
-          className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-16"
-        />
-      </div>
       <ContactSection locale={locale} />
     </>
   );
