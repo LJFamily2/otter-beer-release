@@ -24,7 +24,6 @@ const COPY = {
     cookieSettings: "CÀI ĐẶT COOKIE",
     wholesale: "PHÂN PHỐI SỈ",
     contact: "LIÊN HỆ",
-    builtBy: "Thiết kế & phát triển bởi",
   },
   en: {
     navLabel: "Footer Navigation",
@@ -39,7 +38,6 @@ const COPY = {
     cookieSettings: "COOKIE PREFERENCES",
     wholesale: "WHOLESALE",
     contact: "CONTACT",
-    builtBy: "Designed & developed by",
   },
 } as const;
 
@@ -160,21 +158,6 @@ export function Footer({ locale = DEFAULT_LOCALE }: FooterProps) {
               {copy.wholesale}
             </Link>
           </nav>
-        </div>
-
-        {/* Developer Credit Watermark */}
-        <div className="mt-5 flex items-center justify-center sm:mt-6">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary/40 sm:text-[11px]">
-            {copy.builtBy}&nbsp;
-            <a
-              href="https://github.com/LJFamily2"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-primary/60 transition-colors duration-200 hover:text-primary/90"
-            >
-              LJFamily2
-            </a>
-          </p>
         </div>
       </div>
     </footer>

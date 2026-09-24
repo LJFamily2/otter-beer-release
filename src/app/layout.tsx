@@ -114,8 +114,6 @@ export default async function RootLayout({
     <html lang={lang} className={`${anton.variable} ${hankenGrotesk.variable} scroll-smooth`} data-scroll-behavior="smooth">
       {/*
         ╔══════════════════════════════════════════════════════════════╗
-        ║  Designed & developed by LJFamily2                          ║
-        ║  https://github.com/LJFamily2                               ║
         ║  © 2024 – 2026 BadenBeer / Otter Beer                      ║
         ╚══════════════════════════════════════════════════════════════╝
       */}

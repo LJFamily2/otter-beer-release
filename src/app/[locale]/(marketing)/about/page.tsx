@@ -32,7 +32,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
     .catch(() => []);
 
   return (
-    <div className="min-h-screen bg-[#0e0c0b]">
+    <div className="min-h-screen bg-[#0e0c0b] pt-20 sm:pt-28 lg:pt-32">
       {brandStoryChapters.length > 0 ? (
         <BrandStorySection locale={locale} chapters={brandStoryChapters} />
       ) : (
